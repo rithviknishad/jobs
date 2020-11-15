@@ -3,6 +3,4 @@
 /// More dartdocs go here.
 library jobs;
 
-export 'src/jobs_base.dart';
-
-// TODO: Export any libraries intended for clients of this package.
+export 'src/links.dart';
