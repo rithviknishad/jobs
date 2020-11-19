@@ -2,17 +2,22 @@ import 'package:meta/meta.dart';
 
 @immutable
 class FlowContext {
-  final Map<String, dynamic> data = {};
+  final Map<String, dynamic> _data = {};
 
-  FlowContext operator +(FlowContext context) =>
-      this..data.addAll(context.data);
+  FlowContext() {
+    update({
+      'context id': hashCode,
+      'created on': DateTime.now(),
+    });
+  }
 
-  operator [](String key) => data[key];
+  int get contextID => this['context id'];
 
-  toString() => """
-  context_id: $contextID
-  $data
-  """;
+  DateTime get createdOn => this['created on'];
 
-  int get contextID => hashCode;
+  operator [](String key) => _data[key];
+
+  void update(Map entries) => _data.addAll(entries);
+
+  toString() => '$_data';
 }
