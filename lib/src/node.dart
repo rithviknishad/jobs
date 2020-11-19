@@ -1,4 +1,4 @@
-import 'package:bakecode_jobs/bakecode-jobs.dart';
+import '../bakecode-jobs.dart';
 import 'package:meta/meta.dart';
 
 // TODO: add progress awaition for flowcontext specials... make use of listen.onDone callback

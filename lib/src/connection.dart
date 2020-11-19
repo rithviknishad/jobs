@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:bakecode_jobs/bakecode-jobs.dart';
+import '../bakecode-jobs.dart';
 import 'package:meta/meta.dart';
 
 /// This asbtract class gives access to the stream of the [Connection].
