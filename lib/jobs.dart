@@ -3,4 +3,6 @@
 /// More dartdocs go here.
 library jobs;
 
-export 'src/links.dart';
+export 'src/flow_context.dart';
+export 'src/connection.dart';
+export 'src/node.dart';
