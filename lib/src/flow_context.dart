@@ -19,7 +19,7 @@ class FlowContext {
 
   operator [](String key) => _data[key];
 
-  void set(Map entries) => _data.addAll(entries);
+  void set(Map<String, dynamic> entries) => _data.addAll(entries);
 
   toString() => '$_data';
 }
