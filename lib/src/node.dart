@@ -42,19 +42,21 @@ abstract class Node {
   void await(InputConnection input) {
     inputContexts[input] = null;
 
-    input.stream.listen(
+    var subscription = input.stream.listen(
       (context) => inputContexts[input] = context,
-      onDone: () async {
-        if (receivedAll) {
-          output.sink
-            ..add(await run(inputContexts.values.last)) // TODO: use stream*
-            ..close();
-        }
-      },
       // TODO: add onError using connection.addError => _flow.addError,
       // allow these to be custom defined too.
       cancelOnError: true,
     );
+    subscription.onDone(() async {
+      if (receivedAll) {
+        var context = await run(inputContexts.values.last);
+
+        output.sink
+          ..add(context)
+          ..close();
+      }
+    });
   }
 
   /// Connects the instance node to the specified [node].
