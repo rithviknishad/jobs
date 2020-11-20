@@ -15,6 +15,8 @@ class FlowContext {
 
   DateTime get createdOn => this['created on'];
 
+  operator []=(String key, dynamic value) => _data[key] = value;
+
   operator [](String key) => _data[key];
 
   void update(Map entries) => _data.addAll(entries);
