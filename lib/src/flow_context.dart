@@ -5,7 +5,7 @@ class FlowContext {
   final Map<String, dynamic> _data = {};
 
   FlowContext() {
-    update({
+    set({
       'context id': hashCode,
       'created on': DateTime.now(),
     });
@@ -19,7 +19,7 @@ class FlowContext {
 
   operator [](String key) => _data[key];
 
-  void update(Map entries) => _data.addAll(entries);
+  void set(Map entries) => _data.addAll(entries);
 
   toString() => '$_data';
 }

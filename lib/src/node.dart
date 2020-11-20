@@ -47,7 +47,7 @@ abstract class Node {
       onDone: () async {
         if (receivedAll) {
           output.sink
-            ..add(await run(FlowContext.merge(inputContexts.values)))
+            ..add(await run(inputContexts.values.last)) // TODO: use stream*
             ..close();
         }
       },
