@@ -6,7 +6,10 @@ abstract class Node extends Connectable {
   @override
   @nonVirtual
   @protected
-  void onReady(FlowContext context) async => completeWith(await run(context));
+  void onReady(FlowContext context) async {
+    await run(context);
+    completeWith(context);
+  }
 
   /// Executed when [receivedAll] evaluates to true.
   ///
@@ -14,5 +17,5 @@ abstract class Node extends Connectable {
   /// External invocation shall not be performed. This function is automatically
   /// invoked when every [InputConnection] in [inputs] closes.
   @protected
-  Future<FlowContext> run(FlowContext context);
+  Future<void> run(FlowContext context);
 }
