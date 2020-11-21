@@ -2,12 +2,14 @@ import 'package:bakecode_jobs/bakecode-jobs.dart';
 
 class SandboxJob extends Node {
   @override
-  Future<FlowContext> run(FlowContext context) async {
-    await Future.delayed(Duration(seconds: 2));
+  Future<void> run(FlowContext context) async {
+    print('running $hashCode w/ context: $context.');
 
-    return context
-      ..set({
-        'SandBoxJob-$hashCode completed on': DateTime.now(),
-      });
+    context.set({'$hashCode deployed on': DateTime.now()});
+
+    await Future.delayed(Duration(seconds: 3));
+    print('running $hashCode completed.');
+
+    context.set({'$hashCode finished on': DateTime.now()});
   }
 }
