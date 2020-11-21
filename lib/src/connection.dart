@@ -11,6 +11,11 @@ abstract class InputConnection {
 
   /// Whether the connection is closed.
   bool get isClosed;
+
+  Connectable get source;
+
+  @override
+  String toString() => 'InputConnection(source: $source)';
 }
 
 /// This abstract class presents functionalities to connect the output to
@@ -20,14 +25,22 @@ abstract class OutputConnection {
   /// The sink of the [Connection._flow].
   Sink<FlowContext> get sink;
 
-  /// Makes a forward connection to a Node.
-  void connectTo(Node node);
+  Connectable get destination;
+
+  @override
+  String toString() => 'OutputConnection(destination: $destination)';
 }
 
 /// The element that links multiple [Node]s.
 @immutable
 class Connection with InputConnection, OutputConnection {
   final _flow = StreamController<FlowContext>();
+
+  final Connectable source, destination;
+
+  Connection({@required this.source, @required Connectable this.destination})
+      : assert(source != null),
+        assert(destination != null);
 
   @override
   bool get isClosed => _flow.isClosed;
@@ -38,8 +51,6 @@ class Connection with InputConnection, OutputConnection {
   @override
   Stream<FlowContext> get stream => _flow.stream.asBroadcastStream();
 
-  final awaiters = <Node>[];
-
   @override
-  void connectTo(Node node) => awaiters.add(node);
+  String toString() => 'Connection(source: $source, destination: $destination)';
 }
