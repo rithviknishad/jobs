@@ -3,30 +3,10 @@ import 'package:meta/meta.dart';
 import '../bakecode-jobs.dart';
 
 abstract class Connectable {
-  /// All the input connections to the connectable instance.
-  final _inputs = <InputConnection>[];
+  final inputsState = <Connectable, FlowContext>{};
 
   /// All the output connections from the connectable instance.
-  final _outputs = <OutputConnection>[];
-
-  /// Iterable of all the [InputConnection]s to the [Connectable] instance.
-  Iterable<InputConnection> get inputs => _inputs;
-
-  /// Iterable of all the [OutputConnection]s from the connectable instance.
-  Iterable<OutputConnection> get outputs => _outputs;
-
-  /// [Connectable]s that have forward connection towards the connectable
-  /// instance.
-  ///
-  /// *Example:*
-  /// ```dart
-  /// A.connectTo(C);
-  /// B.connectTo(C);
-  ///
-  /// print(C.previous);
-  /// ```
-  /// Output: `[A, B]`
-  Iterable<Connectable> get previous => inputs.map((input) => input.source);
+  final next = <Connectable>[];
 
   /// [Connectable]s that have forward connection from the connectable instance.
   ///
@@ -38,33 +18,21 @@ abstract class Connectable {
   /// print(A.previous);
   /// ```
   /// Output: `[B, C]`
-  Iterable<Connectable> get next => outputs.map((output) => output.destination);
+  // Iterable<Connectable> get next => outputs.map((output) => output.destination);
 
-  /// All [Connection]s associated with the connectable instance.
-  ///
-  /// Returns an iterable that concatenates the [inputs] and [outputs] of the
-  /// connectable instance.
-  ///
-  /// The [Connection]s in the iterable either have [Connection.source] or
-  /// [Connection.destination] as this connectable instance.
-  Iterable<Connection> get connections =>
-      inputs.cast<Connection>().followedBy(outputs);
+  void updateInputsState(FlowContext context, {@required Connectable source}) {
+    inputsState[source] = context;
 
-  void _awaitFor(InputConnection source) {
-    _inputs.add(source);
-
-    source.stream.listen((context) {})
-      ..onDone(() async {
-        if (inputsClosed)
-          onReady(await source.stream.last); // TODO: merge contexts...
-      });
+    if (isReady) {
+      onReady(context);
+    }
   }
 
   /// Whether every inputs are closed.
   ///
   /// Evaluates to true if every [InputConnection] in [inputs] evaluates to true
   /// for [InputConnection.isClosed].
-  bool get inputsClosed => inputs.every((connection) => connection.isClosed);
+  bool get isReady => inputsState.values.every((context) => context != null);
 
   /// Connects the instance to [destination] and returns the [Connection].
   ///
@@ -73,14 +41,8 @@ abstract class Connectable {
   ///
   /// The [destination] will start awaiting for this connectable instance to
   /// [completeWith] a valid [FlowContext] for it's [onReady] to be triggered.
-  Connection connectTo(Connectable destination) {
-    var connection = Connection(source: this, destination: destination);
-
-    _outputs.add(connection);
-    destination._awaitFor(connection);
-
-    return connection;
-  }
+  void connectTo(Connectable destination) =>
+      next.add(destination..inputsState[this] = null);
 
   /// The function that will be invoked once every [Connectable] in [previous]
   /// completes.
@@ -100,9 +62,6 @@ abstract class Connectable {
   /// class.
   @nonVirtual
   @protected
-  void completeWith(FlowContext context) {
-    outputs.forEach((output) => output.sink
-      ..add(context)
-      ..close());
-  }
+  void completeWith(FlowContext context) => next.forEach(
+      (connectable) => connectable.updateInputsState(context, source: this));
 }
