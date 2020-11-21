@@ -1,15 +1,15 @@
 import 'package:bakecode_jobs/bakecode-jobs.dart';
 import 'package:meta/meta.dart';
 
-class Flow extends Connectable {
-  final Connectable startsFrom;
-
-  Flow({@required this.startsFrom}) : assert(startsFrom != null) {
-    this.connectTo(startsFrom);
+class Flow extends Node {
+  Flow({@required Iterable<Node> startsFrom}) : assert(startsFrom != null) {
+    this.connectToAll(startsFrom);
   }
 
-  @override
-  void onReady(FlowContext context) => completeWith(context);
-
   void start() => onReady(FlowContext());
+
+  @override
+  Future<void> run(FlowContext context) async {
+    // TODO: add few about starting the flow here..
+  }
 }

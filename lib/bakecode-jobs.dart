@@ -4,5 +4,4 @@
 library jobs;
 
 export 'src/flow_context.dart';
-export 'src/connectable.dart';
 export 'src/node.dart';

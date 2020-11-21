@@ -12,4 +12,6 @@ class SandboxJob extends Node {
 
     context.set({'$hashCode finished on': DateTime.now()});
   }
+
+  toString() => '$hashCode';
 }

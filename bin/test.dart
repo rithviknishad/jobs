@@ -21,5 +21,7 @@ void main(List<String> args) {
   B.connectTo(D);
   C.connectTo(D);
 
-  Flow(startsFrom: A).start();
+  var f = Flow(startsFrom: A);
+
+  print(f.endsAt);
 }
