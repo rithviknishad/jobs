@@ -4,6 +4,8 @@ import 'package:meta/meta.dart';
 /// A connectable element.
 abstract class Node extends Connectable {
   @override
+  @nonVirtual
+  @protected
   void onReady(FlowContext context) async => completeWith(await run(context));
 
   /// Executed when [receivedAll] evaluates to true.
