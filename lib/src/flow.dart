@@ -1,10 +1,11 @@
 import 'package:bakecode_jobs/bakecode-jobs.dart';
-import 'package:meta/meta.dart';
 
 class Flow extends Node {
-  Flow({@required Iterable<Node> startsFrom}) : assert(startsFrom != null) {
+  Flow.startsFrom(Iterable<Node> startsFrom) : assert(startsFrom != null) {
     this.connectToAll(startsFrom);
   }
+
+  factory Flow.startFrom(Node from) => Flow.startsFrom([from]);
 
   void start() => onReady(FlowContext());
 

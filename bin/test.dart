@@ -9,19 +9,16 @@ void main(List<String> args) {
   var B = SandboxJob();
   var C = SandboxJob();
   var D = SandboxJob();
+  var E = SandboxJob();
 
-  print('A is ${A.hashCode}');
-  print('B is ${B.hashCode}');
-  print('C is ${C.hashCode}');
-  print('D is ${D.hashCode}');
+  var flow = Flow.startFrom(A
+    ..connectToAll(
+      [
+        B..connectTo(E),
+        C..connectTo(E),
+        D,
+      ],
+    ));
 
-  A.connectTo(B);
-  A.connectTo(C);
-
-  B.connectTo(D);
-  C.connectTo(D);
-
-  var f = Flow(startsFrom: A);
-
-  print(f.endsAt);
+  flow.start();
 }

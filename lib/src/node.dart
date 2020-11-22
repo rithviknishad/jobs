@@ -44,16 +44,14 @@ abstract class Node {
   ///
   /// *Example:*
   /// ```dart
-  /// var flow = Flow(startsFrom: [
-  ///   A
-  ///     ..connectToAll(
-  ///       [
-  ///         B..connectTo(E),
-  ///         C..connectTo(E),
-  ///         D,
-  ///       ],
-  ///     )
-  /// ]);
+  /// var flow = Flow.startFrom(A
+  ///   ..connectToAll(
+  ///     [
+  ///       B..connectTo(E),
+  ///       C..connectTo(E),
+  ///       D,
+  ///     ],
+  ///   ));
   ///
   /// print(flow.endsAt);
   /// print(flow.endsAt.toSet());
