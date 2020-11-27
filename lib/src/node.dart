@@ -1,12 +1,26 @@
+import 'package:bakecode_jobs/src/connection.dart';
+
 import '../bakecode-jobs.dart';
 import 'package:meta/meta.dart';
 
 /// A connectable entity
 abstract class Node {
-  final _awaits = <Node>[];
+  final _inputs = <InputConnection>[];
 
-  /// All the output connections from the instance node.
-  final _next = <Node>[];
+  /// [Node]s that have forward connection to the instance node.
+  ///
+  /// *Example:*
+  /// ```dart
+  /// B.connectTo(D);
+  /// C.connectTo(D);
+  ///
+  /// print(D.awaits);
+  /// ```
+  /// Output: `[B, C]`
+  @nonVirtual
+  Iterable<Node> get awaits => _inputs.map((node) => node.from);
+
+  final _outputs = <OutputConnection>[];
 
   /// [Node]s that have forward connection from the instance node.
   ///
@@ -18,7 +32,8 @@ abstract class Node {
   /// print(A.next);
   /// ```
   /// Output: `[B, C]`
-  Iterable<Node> get next => _next;
+  @nonVirtual
+  Iterable<Node> get next => _outputs.map((node) => node.to);
 
   /// Whether the instance node is further connected to another node.
   ///
@@ -30,7 +45,8 @@ abstract class Node {
   /// A.hasNext == true;
   /// B.hasNext == false;
   /// ```
-  bool get hasNext => _next.isEmpty == false;
+  @nonVirtual
+  bool get hasNext => _outputs.isEmpty == false;
 
   /// Recursively finds the end nodes for the instance node.
   ///
@@ -62,19 +78,21 @@ abstract class Node {
   /// [D, E, E]
   /// {D, E}
   /// ```
+  @nonVirtual
   Iterable<Node> get endsAt => (hasNext
-      ? _next.map((n) => n.endsAt).reduce((a, b) => a.followedBy(b))
+      ? next.map((n) => n.endsAt).reduce((a, b) => a.followedBy(b))
       : [this]);
 
   /// Updates the input state for [source] w/ the [context].
   ///
   /// After updating if [isReady] evaluates to true, [onReady] is invoked w/
   /// the provided [context].
-  void _updateInputState(Node source, FlowContext context) {
-    _awaits.remove(source);
+  @nonVirtual
+  void _receiveInput(Node source, FlowContext context) {
+    disconnectFrom(source);
 
     if (isReady) {
-      onReady(context);
+      onReady.call(context);
     }
   }
 
@@ -82,11 +100,13 @@ abstract class Node {
   ///
   /// Evaluates to true if there are no nodes connected to the instance node,
   /// pending to finish.
-  bool get isReady => _awaits.isEmpty;
+  @nonVirtual
+  bool get isReady => _inputs.isEmpty;
 
   /// Whether the instance node is connected or not to the [destination] node.
   ///
   /// Returns true if [next] contains the [destination] node, else false.
+  @nonVirtual
   bool isConnectedTo(Node destination) => next.contains(destination);
 
   /// Connects the instance node to the [destination] node.
@@ -101,21 +121,43 @@ abstract class Node {
   ///
   /// The [destination] node will start awaiting for the instance node to be
   /// completed w/ a valid [FlowContext] for it's [onReady] to be triggered.
-  void connectTo(Node destination) => _next.add(destination.._awaits.add(this));
+  ///
+  /// Returns the [Connection] instance that connects the instance node and
+  /// [destination] node.
+  @nonVirtual
+  Connection connectTo(Node destination) {
+    if (isConnectedTo(destination))
+      return _outputs.firstWhere((connection) => connection.to == destination);
+
+    var connection = Connection(from: this, to: destination);
+
+    _outputs.add(connection);
+    destination._inputs.add(connection);
+
+    return connection;
+  }
+
+  @nonVirtual
+  void disconnectFrom(Node source) {
+    source._outputs.removeWhere((connection) => connection.to == this);
+    _inputs.removeWhere((connection) => connection.from == source);
+  }
 
   /// Connects the instance to every node in [destinations].
   ///
   /// The [destination] node will start awaiting for the instance node to be
   /// completed w/ a valid [FlowContext] for it's [onReady] to be triggered.
-  void connectToAll(List<Node> destinations) => destinations.forEach(connectTo);
+  @nonVirtual
+  Iterable<Connection> connectToAll(Iterable<Node> destinations) =>
+      destinations.map(connectTo);
 
   /// Completes the Node instance with [context] and informs every nodes in
   /// [next] about the updated [context].
   ///
   /// This method **must** be called after this Node's work so that nodes
   /// awaiting for this node to complete can know when completed.
-  void completeWith(FlowContext context) =>
-      next.forEach((Node) => Node._updateInputState(this, context));
+  void _completeWith(FlowContext context) =>
+      next.forEach((node) => node._receiveInput(this, context));
 
   /// The function that will be invoked once every connected to the instance
   /// node complete, i.e., when [isReady] evaluates to true.
@@ -126,7 +168,7 @@ abstract class Node {
   @protected
   void onReady(FlowContext context) async {
     await run(context);
-    completeWith(context);
+    _completeWith(context);
   }
 
   /// Executed by [onReady] when [isReady] evaluates to true.
