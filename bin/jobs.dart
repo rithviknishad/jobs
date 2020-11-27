@@ -1,17 +1,30 @@
 import 'package:bakecode_jobs/bakecode-jobs.dart';
 
 class SandboxJob extends Node {
-  @override
-  Future<void> run(FlowContext context) async {
-    print('running $hashCode w/ context: $context.');
-
-    context.set({'$hashCode deployed on': DateTime.now()});
-
-    await Future.delayed(Duration(seconds: 3));
-    print('running $hashCode completed.');
-
-    context.set({'$hashCode finished on': DateTime.now()});
+  SandboxJob() {
+    print(hashCode);
   }
 
-  toString() => '$hashCode';
+  @override
+  String get name => 'Sandbox Job';
+
+  @override
+  String get description => 'A sample sandbox job';
+
+  @override
+  String get uuid => '55ed263d-5257-4239-a6fd-43a9350d27aa';
+
+  @override
+  Future<void> run(FlowContext context) async {
+    print('deployed $this w/ context: $context.');
+    context.set({'$this deployed on': DateTime.now()});
+
+    await Future.delayed(Duration(seconds: 3));
+
+    print('$this completed.');
+    context.set({'$this completed on': DateTime.now()});
+  }
+
+  @override
+  String toString() => '$name ($uuid) instance: $hashCode';
 }

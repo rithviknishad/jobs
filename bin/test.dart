@@ -4,21 +4,23 @@ import 'package:bakecode_jobs/src/flow.dart';
 
 import 'jobs.dart';
 
-void main(List<String> args) {
+void main(List<String> args) async {
   var A = SandboxJob();
   var B = SandboxJob();
   var C = SandboxJob();
   var D = SandboxJob();
   var E = SandboxJob();
 
-  var flow = Flow.startFrom(A
-    ..connectToAll(
-      [
-        B..connectTo(E),
-        C..connectTo(E),
-        D,
-      ],
-    ));
+  A.connectToAll([B, C, D]);
 
-  flow.start();
+  B.connectTo(E);
+  C.connectTo(E);
+
+  var flow = Flow(
+    name: 'Sample',
+    description: 'A sample flow lol',
+    startsFrom: [A],
+  );
+
+  await flow.start();
 }

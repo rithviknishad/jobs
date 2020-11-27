@@ -1,19 +1,37 @@
+import 'dart:async';
+
 import 'package:bakecode_jobs/bakecode-jobs.dart';
 import 'package:meta/meta.dart';
 
 @immutable
 mixin InputConnection {
-  Node get from;
+  Node get source;
+
+  Stream<FlowContext> get stream;
 }
 
 @immutable
 mixin OutputConnection {
-  Node get to;
+  Node get destination;
+
+  Sink<FlowContext> get sink;
 }
 
 class Connection with InputConnection, OutputConnection {
-  final Node from;
-  final Node to;
+  final Node source, destination;
 
-  const Connection({@required this.from, @required this.to});
+  @protected
+  @nonVirtual
+  final flowController = StreamController<FlowContext>();
+
+  Connection({@required this.source, @required this.destination});
+
+  @override
+  Stream<FlowContext> get stream => flowController.stream;
+
+  @override
+  Sink<FlowContext> get sink => flowController.sink;
+
+  @override
+  String toString() => 'Connection(from: $source, to: $destination)';
 }
