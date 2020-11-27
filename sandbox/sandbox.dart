@@ -1,4 +1,7 @@
+import 'dart:developer';
+
 import 'package:bakecode_jobs/bakecode-jobs.dart';
+import 'package:bakecode_jobs/src/flow.dart';
 
 class SandboxJob extends Node {
   @override
@@ -23,4 +26,25 @@ class SandboxJob extends Node {
 
   @override
   String toString() => '$name ($uuid/$hashCode)';
+}
+
+void main(List<String> args) {
+  var A = SandboxJob();
+  var B = SandboxJob();
+  var C = SandboxJob();
+  var D = SandboxJob();
+  var E = SandboxJob();
+
+  A.connectToAll([B, C, D]);
+
+  B.connectTo(E);
+  C.connectTo(E);
+
+  var flow = Flow(
+    name: 'Sample',
+    description: 'A sample flow lol',
+    startsFrom: [A],
+  );
+
+  flow.start();
 }
