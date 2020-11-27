@@ -1,10 +1,6 @@
 import 'package:bakecode_jobs/bakecode-jobs.dart';
 
 class SandboxJob extends Node {
-  SandboxJob() {
-    print(hashCode);
-  }
-
   @override
   String get name => 'Sandbox Job';
 
@@ -16,15 +12,15 @@ class SandboxJob extends Node {
 
   @override
   Future<void> run(FlowContext context) async {
-    print('deployed $this w/ context: $context.');
+    print('running $this');
     context.set({'$this deployed on': DateTime.now()});
 
     await Future.delayed(Duration(seconds: 3));
 
-    print('$this completed.');
+    print('completed $this');
     context.set({'$this completed on': DateTime.now()});
   }
 
   @override
-  String toString() => '$name ($uuid) instance: $hashCode';
+  String toString() => '$name ($uuid/$hashCode)';
 }

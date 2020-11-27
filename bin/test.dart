@@ -4,7 +4,7 @@ import 'package:bakecode_jobs/src/flow.dart';
 
 import 'jobs.dart';
 
-void main(List<String> args) async {
+void main(List<String> args) {
   var A = SandboxJob();
   var B = SandboxJob();
   var C = SandboxJob();
@@ -22,5 +22,5 @@ void main(List<String> args) async {
     startsFrom: [A],
   );
 
-  await flow.start();
+  flow.start();
 }

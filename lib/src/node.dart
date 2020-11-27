@@ -167,7 +167,7 @@ abstract class Node {
   /// updated [context].
   @nonVirtual
   @protected
-  Future<void> onReady(FlowContext context) async {
+  void onReady(FlowContext context) async {
     await run(context);
     outputs.forEach((output) => output.sink.add(context));
   }
