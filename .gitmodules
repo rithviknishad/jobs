@@ -1,0 +1,3 @@
+[submodule "bsi-dart"]
+	path = bsi-dart
+	url = https://github.com/crysalisdevs/bsi-dart.git
