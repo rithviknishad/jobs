@@ -68,7 +68,7 @@ abstract class Node {
 
   /// Updates the input state for [source] w/ the [context].
   ///
-  /// If after updating, [isReady] evaluates to true, [onReady] is invoked w/
+  /// After updating if [isReady] evaluates to true, [onReady] is invoked w/
   /// the provided [context].
   void _updateInputState(Node source, FlowContext context) {
     _awaits.remove(source);
@@ -83,6 +83,11 @@ abstract class Node {
   /// Evaluates to true if there are no nodes connected to the instance node,
   /// pending to finish.
   bool get isReady => _awaits.isEmpty;
+
+  /// Whether the instance node is connected or not to the [destination] node.
+  ///
+  /// Returns true if [next] contains the [destination] node, else false.
+  bool isConnectedTo(Node destination) => next.contains(destination);
 
   /// Connects the instance node to the [destination] node.
   ///
