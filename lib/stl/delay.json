@@ -1,0 +1,12 @@
+{
+    "title": "Delay",
+    "description": "Delay by an amount",
+    "author": "Bakecode",
+    "width": 180.0,
+    "height": 90.0,
+    "properties": {
+        "Duration": 0.0
+    },
+    "gitUpdathPath": "null",
+    "bakeCodeVersion": 1.0
+}
