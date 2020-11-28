@@ -12,12 +12,9 @@ class Flow extends Node {
     @required this.name,
     @required this.description,
     @required Iterable<Node> startsFrom,
-  }) {
+  }) : super('e9e2e926-434c-4f25-9262-7fdfed7153d7') {
     this.connectToAll(startsFrom);
   }
-
-  @override
-  String get uuid => 'e9e2e926-434c-4f25-9262-7fdfed7153d7';
 
   @override
   FutureOr run(FlowContext context) {
