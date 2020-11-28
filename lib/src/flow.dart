@@ -21,5 +21,8 @@ class Flow extends Node {
     print('Starting flow: $this');
   }
 
-  void start() => onReady(FlowContext());
+  void start(FlowContext context) => onReady(context);
+
+  @override
+  Map<String, Object> get props => {};
 }

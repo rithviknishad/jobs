@@ -24,6 +24,9 @@ class SandboxJob extends Node {
   }
 
   @override
+  Map<String, Object> get props => {};
+
+  @override
   String toString() => '$name ($uuid/$hashCode)';
 }
 
@@ -45,5 +48,5 @@ void main(List<String> args) {
     startsFrom: [A],
   );
 
-  flow.start();
+  flow.start(FlowContext());
 }

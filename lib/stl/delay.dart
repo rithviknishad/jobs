@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:bakecode_jobs/bakecode-jobs.dart';
+import 'package:bakecode_jobs/src/provider.dart';
 
 class DelayNode extends Node {
   @override
@@ -11,6 +12,16 @@ class DelayNode extends Node {
 
   DelayNode(String uuid) : super(uuid);
 
-  run(FlowContext context) => Future.delayed(
-      Duration(seconds: context['$this.durationInSeconds'] as int));
+  Future<void> run(FlowContext context) {
+    final delay = Provider.of('$this.delay', context);
+
+    return Future.delayed(
+      Duration(seconds: delay),
+    );
+  }
+
+  @override
+  Map<String, Object> get props => {
+        '$this.delayInSeconds': 0,
+      };
 }

@@ -19,6 +19,9 @@ abstract class Node {
   @nonVirtual
   final String uuid;
 
+  /// All the properties here...
+  Map<String, Object> get props;
+
   /// Node constructor.
   ///
   /// [uuid] shall be given to instantiate the node in a flow.
@@ -188,5 +191,5 @@ abstract class Node {
   FutureOr run(FlowContext context);
 
   @override
-  String toString() => '$hashCode';
+  String toString() => '$uuid';
 }
