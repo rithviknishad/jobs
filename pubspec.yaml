@@ -9,6 +9,6 @@ environment:
   sdk: ">=2.8.1 <3.0.0"
 
 dependencies:
-  bsi_dart:
-    path: "../bsi-dart/"
+  bsi:
+    path: "../bsi/"
   meta:
