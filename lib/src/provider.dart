@@ -1,6 +1,5 @@
-import 'package:bakecode_jobs/bakecode-jobs.dart';
+part of bakecode;
 
 abstract class Provider {
-  static T of<T>(String property, FlowContext context, {Node forNode}) =>
-      context['${forNode ?? ''}/$property'];
+  static T of<T>(FlowContext context) => context[T];
 }
