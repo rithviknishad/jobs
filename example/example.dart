@@ -3,9 +3,29 @@ import 'dart:async';
 import 'package:bakecode/bakecode.dart';
 import 'package:meta/meta.dart';
 
-void main(List<String> args) => runFlow(MyFlow());
+Future<void> main(List<String> args) async {
+  await runFlow(MyFlow());
+}
 
 class MyFlow extends Flow {
+  @override
+  FutureOr<Flow> run(FlowContext context) {
+    return ParallelFlow(
+      flows: [
+        DelayedPrinterJob(),
+        PrinterJob(),
+      ],
+      next: FlowBuilder(
+        builder: (context) {
+          print("OnComplete");
+          return;
+        },
+      ),
+    );
+  }
+}
+
+class DelayedPrinterJob extends Flow {
   @override
   FutureOr<Flow> run(FlowContext context) {
     return Delayed(
