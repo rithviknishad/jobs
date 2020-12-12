@@ -17,12 +17,14 @@ class FlowBuilder extends Flow {
   FutureOr<Flow> run(FlowContext context) => builder(context);
 }
 
-Future<void> runFlow(Flow flow) async {
+Future<FlowContext> runFlow(Flow flow) async {
   final controller = FlowController(flow: flow);
 
   controller.start();
 
   await controller.done;
+
+  return controller.context;
 }
 
 /// The possible states of a [FlowController].
