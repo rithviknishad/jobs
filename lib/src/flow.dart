@@ -8,8 +8,6 @@ abstract class Flow {
   FutureOr<Flow> run(FlowContext context);
 }
 
-void runFlow(Flow flow) => FlowController(flow: flow)..start();
-
 /// The possible states of a [FlowController].
 enum FlowState {
   /// The state in which the [FlowController] attempts to complete the pending
@@ -118,6 +116,17 @@ class FlowController {
     }
 
     _stateSink.add(FlowState.Stopped);
+  }
+
+  Future<void> get done => _ensureDone();
+
+  Future<void> _ensureDone() async {
+    if (currentState == FlowState.Completed ||
+        currentState == FlowState.Stopped) return;
+
+    await _flowStateStreamController.done;
+
+    return;
   }
 
   /// The next flow that is to be completed.
