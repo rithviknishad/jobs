@@ -1,4 +1,4 @@
-name: bakecode_jobs
+name: bakecode
 description: BakeCode Framework, perform actions in bakecode ecosystem.
 version: 0.1.0-alpha
 homepage: https://github.com/crysalisdevs/bakecode-jobs.git
