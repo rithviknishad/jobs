@@ -8,6 +8,23 @@ abstract class Flow {
   FutureOr<Flow> run(FlowContext context);
 }
 
+class FlowBuilder extends Flow {
+  final FutureOr<Flow> Function(FlowContext context) builder;
+
+  FlowBuilder({@required this.builder});
+
+  @override
+  FutureOr<Flow> run(FlowContext context) => builder(context);
+}
+
+Future<void> runFlow(Flow flow) async {
+  final controller = FlowController(flow: flow);
+
+  controller.start();
+
+  await controller.done;
+}
+
 /// The possible states of a [FlowController].
 enum FlowState {
   /// The state in which the [FlowController] attempts to complete the pending
