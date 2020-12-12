@@ -9,12 +9,12 @@ abstract class Flow {
 }
 
 class FlowBuilder extends Flow {
-  final FutureOr<Flow> Function(FlowContext context) builder;
-
   FlowBuilder({@required this.builder});
 
   @override
   FutureOr<Flow> run(FlowContext context) => builder(context);
+
+  final FutureOr<Flow> Function(FlowContext context) builder;
 }
 
 Future<FlowContext> runFlow(Flow flow) async {
@@ -67,14 +67,34 @@ enum FlowState {
 
 /// A controller for handling execution of [Flow]s.
 class FlowController {
-  /// [StreamController] for the [FlowState] of this controller.
-  final _flowStateStreamController = StreamController<FlowState>();
+  /// Creates a flow controller to handle the completion of a top-level flow.
+  FlowController({@required Flow flow})
+      : assert(flow != null),
+        _next = flow,
+        context = FlowContext() {
+    // Listen to flow state updates.
+    _flowStateStreamController.stream.listen(updateState);
 
-  /// The sink of the [_flowStateStreamController].
-  Sink<FlowState> get _stateSink => _flowStateStreamController.sink;
+    // set this as the flow controller for the completer context.
+    context.set({FlowController: this});
+  }
+
+  /// The flow context for the flow completer to provide on invoking [Flow.run].
+  final FlowContext context;
 
   /// Holds the current [FlowState] of the controller.
   FlowState _currentState;
+
+  /// [StreamController] for the [FlowState] of this controller.
+  final _flowStateStreamController = StreamController<FlowState>();
+
+  /// The next flow that is to be completed.
+  @protected
+  @nonVirtual
+  Flow _next;
+
+  /// The sink of the [_flowStateStreamController].
+  Sink<FlowState> get _stateSink => _flowStateStreamController.sink;
 
   /// The current [FlowState] of the controller.
   FlowState get currentState => _currentState;
@@ -148,14 +168,6 @@ class FlowController {
     return;
   }
 
-  /// The next flow that is to be completed.
-  @protected
-  @nonVirtual
-  Flow _next;
-
-  /// The flow context for the flow completer to provide on invoking [Flow.run].
-  final FlowContext context;
-
   /// Attempts to recursively complete the flow while the [currentState] is
   /// [FlowState.Running].
   ///
@@ -190,35 +202,43 @@ class FlowController {
     }
   }
 
-  /// Creates a flow controller to handle the completion of a top-level flow.
-  FlowController({@required Flow flow})
-      : assert(flow != null),
-        _next = flow,
-        context = FlowContext() {
-    // Listen to flow state updates.
-    _flowStateStreamController.stream.listen(updateState);
-
-    // set this as the flow controller for the completer context.
-    context.set({FlowController: this});
-  }
-
   /// Gets the [FlowController] of the [context].
   static FlowController of(FlowContext context) =>
       Provider.of<FlowController>(context);
 }
 
 class ParallelFlow extends Flow {
-  final Iterable<Flow> flows;
-  final Flow next;
-
   const ParallelFlow({
     @required this.flows,
     this.next,
   });
 
+  final Iterable<Flow> flows;
+  final Flow next;
+
   Future<Flow> run(FlowContext context) async {
     await Future.wait(flows.map((flow) => flow.run(context)));
 
     return next;
+  }
+}
+
+class Recipe extends Flow {
+  const Recipe({
+    @required this.name,
+    this.description,
+    @required this.startsFrom,
+  });
+
+  final Flow startsFrom;
+
+  final String name;
+
+  final String description;
+
+  @override
+  FutureOr<Flow> run(FlowContext context) {
+    // TODO: implement run
+    return startsFrom;
   }
 }
