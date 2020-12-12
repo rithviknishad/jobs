@@ -206,3 +206,19 @@ class FlowController {
   static FlowController of(FlowContext context) =>
       Provider.of<FlowController>(context);
 }
+
+class ParallelFlow extends Flow {
+  final Iterable<Flow> flows;
+  final Flow onDone;
+
+  const ParallelFlow({
+    @required this.flows,
+    this.onDone,
+  });
+
+  Future<Flow> run(FlowContext context) async {
+    await Future.wait(flows.map((flow) => flow.run(context)));
+
+    return onDone;
+  }
+}
