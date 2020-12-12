@@ -1,8 +1,8 @@
-import 'package:meta/meta.dart';
+part of bakecode;
 
 @immutable
 class FlowContext {
-  final Map<String, dynamic> _data = {};
+  final Map _data = {};
 
   FlowContext() {
     set({
@@ -15,11 +15,11 @@ class FlowContext {
 
   DateTime get createdOn => this['created on'];
 
-  operator []=(String key, dynamic value) => _data[key] = value;
+  operator []=(key, value) => _data[key] = value;
 
-  operator [](String key) => _data[key];
+  operator [](key) => _data[key];
 
-  void set(Map<String, dynamic> entries) {
+  void set(Map entries) {
     assert(entries != null);
     _data.addAll(entries);
   }
