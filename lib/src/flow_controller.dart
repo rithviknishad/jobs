@@ -8,7 +8,8 @@ class FlowController {
     RunContext parentContext,
   })  : assert(flow != null),
         next = flow,
-        context = RunContext() // TODO: RunContext(inheritFrom: parentContext)
+        context = parentContext ??
+            RunContext() // TODO: RunContext(inheritFrom: parentContext)
   {
     // Listen to flow state updates.
     _flowStateStreamController.stream.listen(onStateUpdated);

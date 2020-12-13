@@ -21,12 +21,23 @@ class MyFlow extends Flow {
     return ParallelFlow(
       flows: [
         DelayedPrinterJob(),
+        DelayedPrinterJob(),
         PrinterJob(),
       ],
       next: FlowBuilder(
         builder: (context) {
           print("OnComplete");
-          return;
+          return FlowBuilder(builder: (context) {
+            print('onComplet2');
+            return ParallelFlow(
+              flows: [
+                DelayedPrinterJob(),
+                DelayedPrinterJob(),
+                PrinterJob(),
+              ],
+              next: PrinterJob(),
+            );
+          });
         },
       ),
     );
@@ -60,7 +71,7 @@ class Delayed extends Flow {
 class PrinterJob extends Flow {
   @override
   FutureOr<Flow> run(RunContext context) {
-    print('Hello');
+    print(hashCode);
     return null;
   }
 }
