@@ -3,11 +3,11 @@ import 'dart:async';
 import 'package:bakecode/bakecode.dart';
 import 'package:meta/meta.dart';
 
-Future<void> main(List<String> args) => runFlow(MyRecipe());
+void main(List<String> args) => runFlow(MyRecipe());
 
 class MyRecipe extends Flow {
   @override
-  Flow run(FlowContext context) {
+  Flow run(RunContext context) {
     return Recipe(
       name: 'MyRecipe',
       startsFrom: MyFlow(),
@@ -17,7 +17,7 @@ class MyRecipe extends Flow {
 
 class MyFlow extends Flow {
   @override
-  Flow run(FlowContext context) {
+  Flow run(RunContext context) {
     return ParallelFlow(
       flows: [
         DelayedPrinterJob(),
@@ -35,7 +35,7 @@ class MyFlow extends Flow {
 
 class DelayedPrinterJob extends Flow {
   @override
-  Flow run(FlowContext context) {
+  Flow run(RunContext context) {
     return Delayed(
       duration: Duration(seconds: 2),
       next: PrinterJob(),
@@ -53,13 +53,13 @@ class Delayed extends Flow {
   });
 
   @override
-  FutureOr<Flow> run(FlowContext context) async =>
+  FutureOr<Flow> run(RunContext context) async =>
       await Future.delayed(duration, () => next);
 }
 
 class PrinterJob extends Flow {
   @override
-  FutureOr<Flow> run(FlowContext context) {
+  FutureOr<Flow> run(RunContext context) {
     print('Hello');
     return null;
   }
