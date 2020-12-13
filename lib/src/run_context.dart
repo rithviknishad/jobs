@@ -1,10 +1,10 @@
 part of bakecode;
 
 @immutable
-class FlowContext {
+class RunContext {
   final Map _data = {};
 
-  FlowContext() {
+  RunContext() {
     set({
       'context id': hashCode,
       'created on': DateTime.now(),
