@@ -28,7 +28,7 @@ class ParallelFlow extends Flow {
 
   Future<Flow> run(RunContext context) async {
     var subFlowControllers =
-        flows.map((flow) => runSubFlow(flow: flow, parentContext: context));
+        flows.map((flow) => _runSubFlow(flow: flow, parentContext: context));
 
     await Future.wait(subFlowControllers.map((controller) => controller.done));
 

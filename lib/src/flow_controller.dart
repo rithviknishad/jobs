@@ -18,17 +18,45 @@ class FlowController {
     context.set({FlowController: this});
   }
 
-  /// Holds the current [FlowState] of the controller.
-  FlowState _currentState;
+  /// The run context for the flow completer to provide on invoking [Flow.run].
+  RunContext context;
+
+  /// The next flow that is to be completed.
+  @protected
+  @nonVirtual
+  Flow next;
+
+  bool _diagnosticsEnabled = true;
 
   /// [StreamController] for the [FlowState] of this controller.
   final _flowStateStreamController = StreamController<FlowState>();
+
+  /// Holds the current [FlowState] of the controller.
+  ///
+  /// Initial [FlowState] of the controller is [FlowState.Paused]
+  FlowState _state = FlowState.Paused;
 
   /// The sink of the [_flowStateStreamController].
   Sink<FlowState> get _stateSink => _flowStateStreamController.sink;
 
   /// The current [FlowState] of the controller.
-  FlowState get state => _currentState;
+  FlowState get state => _state;
+
+  bool get isRunning => state == FlowState.Running;
+
+  bool get isPaused => state == FlowState.Paused;
+
+  bool get isCompleted => state == FlowState.Completed;
+
+  bool get isStopped => state == FlowState.Stopped;
+
+  bool get canComplete => !isStopped;
+
+  bool get canRun => canComplete && !isCompleted;
+
+  bool get canPause => canComplete && !isCompleted;
+
+  bool get canStop => !isCompleted;
 
   /// Starts or resumes the flow completer.
   ///
@@ -40,8 +68,8 @@ class FlowController {
   /// throw [StateError].
   @nonVirtual
   void start() {
-    if (state == FlowState.Stopped || state == FlowState.Completed) {
-      throw StateError("Flow cannot be started when currentState == $state.");
+    if (!canRun) {
+      throw StateError("Flow cannot be started when state == $state.");
     }
 
     _updateState(FlowState.Running);
@@ -57,8 +85,8 @@ class FlowController {
   /// throw [StateError].
   @nonVirtual
   void pause() {
-    if (state == FlowState.Stopped || state == FlowState.Completed) {
-      throw StateError("Flow cannot be paused when currentState == $state");
+    if (!canPause) {
+      throw StateError("Flow cannot be paused when state == $state");
     }
 
     _updateState(FlowState.Paused);
@@ -76,8 +104,8 @@ class FlowController {
   /// [StateError].
   @nonVirtual
   void stop() {
-    if (state == FlowState.Completed) {
-      throw StateError("Flow cannot be stopped when currentState == $state");
+    if (!canStop) {
+      throw StateError("Flow cannot be stopped when state == $state");
     }
 
     _updateState(FlowState.Stopped);
@@ -86,22 +114,12 @@ class FlowController {
   Future<void> get done => _ensureDone();
 
   Future<void> _ensureDone() async {
-    if (state == FlowState.Completed || state == FlowState.Stopped) return;
+    if (isCompleted || isStopped) return;
 
     await _flowStateStreamController.done;
 
     return;
   }
-
-  bool _diagnosticsEnabled = true;
-
-  /// The run context for the flow completer to provide on invoking [Flow.run].
-  RunContext context;
-
-  /// The next flow that is to be completed.
-  @protected
-  @nonVirtual
-  Flow next;
 
   /// Attempts to recursively complete the flow while the [state] is
   /// [FlowState.Running].
@@ -112,7 +130,7 @@ class FlowController {
   @protected
   @nonVirtual
   Future<void> complete() async {
-    while (state == FlowState.Running) {
+    while (isRunning) {
       next = await next.run(context);
 
       if (next == null) {
@@ -128,13 +146,13 @@ class FlowController {
   @protected
   @nonVirtual
   void onStateUpdated(FlowState state) {
-    _currentState = state;
+    _state = state;
 
-    if (state == FlowState.Running) {
+    if (isRunning) {
       complete();
     }
 
-    if (state == FlowState.Completed || state == FlowState.Stopped) {
+    if (isCompleted || isStopped) {
       _stateSink.close();
     }
   }
@@ -152,7 +170,7 @@ FlowController runFlow(
       .._diagnosticsEnabled = diagnosticsEnabled
       ..start();
 
-FlowController runSubFlow({
+FlowController _runSubFlow({
   @required Flow flow,
   @required RunContext parentContext,
 }) {
