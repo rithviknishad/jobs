@@ -42,20 +42,111 @@ class FlowController {
   /// The current [FlowState] of the controller.
   FlowState get state => _state;
 
+  /// Whether the controller is running or not.
+  ///
+  /// If true, the controller is running, i.e., the controller is attempting
+  /// to complete flow.
+  ///
+  /// If false, the controller is not running, i.e., the controller is not
+  /// attempting to complete the remaining flow. This need not necessarily mean
+  /// that the  controller is paused. It may also be [FlowState.Completed] or
+  /// [FlowState.Stopped].
+  ///
+  /// See also:
+  /// * [isPaused].
+  /// * [isCompleted].
+  /// * [isStopped].
   bool get isRunning => state == FlowState.Running;
 
+  /// Whether the controller is paused or not.
+  ///
+  /// If true, the controller is paused, i.e., the controller is momentarily
+  /// not attempting to complete the remaining flow, until [start] is invoked.
+  ///
+  /// If false, the controller is not paused. However, it may not necessarily
+  /// mean it's running. It may also be [FlowState.Completed] or
+  /// [FlowState.Stopped].
+  ///
+  /// See also:
+  /// * [isRunning].
+  /// * [isCompleted].
+  /// * [isStopped].
   bool get isPaused => state == FlowState.Paused;
 
+  /// Whether the controller is completed or not.
+  ///
+  /// If true, the controller has completed the flows and has achieved
+  /// [FlowState.Completed] and **not**  [FlowState.Stopped].
+  ///
+  /// If false, the controller have not successfully completed yet. The
+  /// controller may be running or is paused, or has stopped before being able
+  /// to complete.
+  ///
+  /// See also:
+  /// * [isRunning].
+  /// * [isPaused].
+  /// * [isStopped].
   bool get isCompleted => state == FlowState.Completed;
 
+  /// Whether the controller is stopped or not.
+  ///
+  /// If true, the controller cannot attempt to complete the remaining flow.
+  /// [stop] was called before the controller was able to complete all of the
+  /// remaining flows.
+  ///
+  /// If false, the controller is not stopped and may be [isRunning] or
+  /// [isPaused] or even [isCompleted].
+  ///
+  /// See also:
+  /// * [isRunning].
+  /// * [isPaused].
+  /// * [isCompleted].
   bool get isStopped => state == FlowState.Stopped;
 
+  /// Whether the controller is eligible to complete the remaining flow.
+  ///
+  /// Returns `true` if the controller can achieve or has achieved the state
+  /// [FlowState.Completed], i.e., the controller has not been stopped
+  /// (see [stop]), as the controller is eligible to complete the remaining
+  /// flow as long as it's not stopped. The current state may or may not be
+  /// [FlowState.Paused] or  [FlowState.Running] or even [FlowState.Completed].
+  ///
+  /// However, the getter returns `false` if the controller [isStopped].
   bool get canComplete => !isStopped;
 
+  /// Whether the controller is eligible to run and attempt completing the
+  /// remaining flow, i.e., calling [start] does not throw a [StateError].
+  ///
+  /// Returns `true` if the controller can achieve [FlowState.Running],
+  /// [FlowState.Paused] or [FlowState.Completed] in the future, and has not
+  /// completed yet. This means that the controller has not achieved neither
+  /// the state [FlowState.Completed] nor [FlowState.Stopped] yet.
+  ///
+  /// Returns `false` if the controller has already completed or stopped, i.e.,
+  /// it has already achieved the state [FlowState.Completed] or
+  /// [FlowState.Stopped].
   bool get canRun => canComplete && !isCompleted;
 
+  /// Whether the controller is eligible to be paused, i.e., calling [pause]
+  /// does not throw a [StateError].
+  ///
+  /// Returns `true` if the controller can achieve [FlowState.Running],
+  /// [FlowState.Paused] or [FlowState.Completed] in the future, and has not
+  /// completed yet. This means that the controller has not achieved neither
+  /// the state [FlowState.Completed] nor [FlowState.Stopped] yet.
+  ///
+  /// Returns `false` if the controller has already completed or stopped, i.e.,
+  /// it has already achieved the state [FlowState.Completed] or
+  /// [FlowState.Stopped].
   bool get canPause => canComplete && !isCompleted;
 
+  /// Whether the controller is elligible to be stopped, i.e., calling [stop]
+  /// does not throw [StateError].
+  ///
+  /// Returns `true` if the controller can achieve or has achieved the state
+  /// [FlowState.Stopped]. This is possible only if the controller has not
+  /// completed the flow, i.e., it has not achieved the state
+  /// [FlowState.Completed] yet, even if its currently [FlowState.Stopped].
   bool get canStop => !isCompleted;
 
   /// Starts or resumes the flow completer.
@@ -152,7 +243,7 @@ class FlowController {
       complete();
     }
 
-    if (isCompleted || isStopped) {
+    if (!canRun == false) {
       _stateSink.close();
     }
   }
