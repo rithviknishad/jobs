@@ -2,7 +2,16 @@ part of bakecode;
 
 /// A controller for handling execution of [Flow]s.
 class FlowController {
-  /// Creates a flow controller to handle the completion of a top-level flow.
+  /// Creates a flow controller that shall attempt to complete the top-level
+  /// [flow].
+  ///
+  /// Use [runFlow] to bind a controller to the [flow] with a new [RunContext]
+  /// and set [RunOptions].
+  ///
+  /// To use a controller inside a flow (use cases such as a sub-flow requiring
+  /// a seperate [FlowController]), use [_runSubFlow], as [RunContext] can be
+  /// inherited from parent flow's controller.
+  /// For implementations of [_runSubFlow], see [ParallelFlow].
   FlowController({
     @required Flow flow,
     RunContext parentContext,
@@ -12,34 +21,52 @@ class FlowController {
             RunContext() // TODO: RunContext(inheritFrom: parentContext)
   {
     // Listen to flow state updates.
-    _flowStateStreamController.stream.listen(onStateUpdated);
+    _flowStateController.stream.listen((newState) {
+      if (state == newState) return;
+
+      onStateChanged(newState);
+    });
 
     // set this as the flow controller for the completer context.
     context.set({FlowController: this});
   }
 
-  /// The run context for the flow completer to provide on invoking [Flow.run].
+  /// The [RunContext] of the flow completer to provide on invoking next flow's
+  /// [Flow.run].
+  @protected
+  @nonVirtual
   RunContext context;
 
-  /// The next flow that is to be completed.
+  /// The next flow that is to be completed by the flow completer.
+  ///
+  /// Can be null if the flow has been completed. However, may not be null if
+  /// it was stopped before being able to complete.
   @protected
   @nonVirtual
   Flow next;
 
+  /// Whether diagnostics are enabled for this flow controller.
+  ///
+  /// If enabled / `true`, all flow controller activities will be reported
+  /// as per configurations in [RunOptions].
   bool _diagnosticsEnabled = true;
 
   /// [StreamController] for the [FlowState] of this controller.
-  final _flowStateStreamController = StreamController<FlowState>();
+  final _flowStateController = StreamController<FlowState>();
 
   /// Holds the current [FlowState] of the controller.
   ///
-  /// Initial [FlowState] of the controller is [FlowState.Paused]
+  /// Initial [FlowState] of the controller is [FlowState.Paused].
   FlowState _state = FlowState.Paused;
 
-  /// The sink of the [_flowStateStreamController].
-  Sink<FlowState> get _stateSink => _flowStateStreamController.sink;
+  /// The sink of the [_flowStateController].
+  Sink<FlowState> get _stateSink => _flowStateController.sink;
 
   /// The current [FlowState] of the controller.
+  ///
+  /// Initially the state is [FlowState.Paused], however by using [runFlow]
+  /// which handles attaching of the controller to a flow, also calls
+  /// [start] which causes to have [FlowState.Running].
   FlowState get state => _state;
 
   /// Whether the controller is running or not.
@@ -202,14 +229,20 @@ class FlowController {
     _updateState(FlowState.Stopped);
   }
 
+  /// Future that completes when the controller completes the flow or is
+  /// stopped.
+  ///
+  /// If already completed, the future completes immediately.
   Future<void> get done => _ensureDone();
 
+  /// Future that completes when the controller completes the flow or is
+  /// stopped.
+  ///
+  /// If already completed, the future completes immediately.
   Future<void> _ensureDone() async {
-    if (isCompleted || isStopped) return;
+    if (!canRun) return;
 
-    await _flowStateStreamController.done;
-
-    return;
+    await _flowStateController.done;
   }
 
   /// Attempts to recursively complete the flow while the [state] is
@@ -231,28 +264,39 @@ class FlowController {
     }
   }
 
-  /// Updates the flow [state] of the controller.
-  void _updateState(FlowState state) => _stateSink.add(state);
-
+  /// Updates the [FlowState] of the controller, by adding the state to the
+  /// state controller's sink.
   @protected
   @nonVirtual
-  void onStateUpdated(FlowState state) {
+  void _updateState(FlowState state) => _stateSink.add(state);
+
+  /// Invoked when there is a change in the [FlowState] of the controller.
+  ///
+  /// This function must call super at the very first if being overriden, so as
+  /// to have the reflected state be accessible.
+  @protected
+  @mustCallSuper
+  void onStateChanged(FlowState state) {
     _state = state;
 
     if (isRunning) {
       complete();
     }
 
-    if (!canRun == false) {
+    if (!canRun) {
       _stateSink.close();
     }
   }
 
-  /// Gets the [FlowController] of the [context].
+  /// Gets the [FlowController] of a flow from it's [context].
   static FlowController of(RunContext context) =>
       Provider.of<FlowController>(context);
 }
 
+/// Starts running the [flow].
+///
+/// Binds a [FlowController] to the [flow], sets the provided [RunOptions] and
+/// invokes [FlowController.start].
 FlowController runFlow(
   Flow flow, {
   bool diagnosticsEnabled = true,
@@ -261,6 +305,14 @@ FlowController runFlow(
       .._diagnosticsEnabled = diagnosticsEnabled
       ..start();
 
+/// For sub-flows that require sharing of context, but with a seperate 
+/// [FlowController], use [_runSubFlow].
+/// 
+/// Throws [MissingFlowControllerException] if there is no controller available
+/// from the [parentContext].
+/// 
+/// [RunOptions] may be different from parent flow controller's run options, if
+/// specified, else uses the same [RunOptions] as in the parent flow controller.
 FlowController _runSubFlow({
   @required Flow flow,
   @required RunContext parentContext,

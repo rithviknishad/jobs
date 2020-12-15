@@ -24,7 +24,7 @@ enum FlowState {
   ///
   /// This state is used when the flow is required to terminate before being
   /// able to complete. Once this state is achieved, Flow execution cannot be
-  /// resumed as the [_flowStateStreamController] will be closed.
+  /// resumed as the [_flowStateController] will be closed.
   ///
   /// Invoking [FlowController.start] or [FlowController.pause] in this state
   /// can cause to throw a [StateError].
