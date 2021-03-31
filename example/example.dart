@@ -59,8 +59,8 @@ class Delayed extends Flow {
   final Flow next;
 
   const Delayed({
-    @required this.duration,
-    @required this.next,
+    required this.duration,
+    required this.next,
   });
 
   @override
@@ -70,7 +70,7 @@ class Delayed extends Flow {
 
 class PrinterJob extends Flow {
   @override
-  FutureOr<Flow> run(RunContext context) {
+  FutureOr<Flow>? run(RunContext context) {
     print(hashCode);
     return null;
   }

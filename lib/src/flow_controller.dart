@@ -13,8 +13,8 @@ class FlowController {
   /// inherited from parent flow's controller.
   /// For implementations of [_runSubFlow], see [ParallelFlow].
   FlowController({
-    @required Flow flow,
-    RunContext parentContext,
+    required Flow flow,
+    RunContext? parentContext,
   })  : assert(flow != null),
         next = flow,
         context = parentContext ??
@@ -43,7 +43,7 @@ class FlowController {
   /// it was stopped before being able to complete.
   @protected
   @nonVirtual
-  Flow next;
+  Flow? next;
 
   /// Whether diagnostics are enabled for this flow controller.
   ///
@@ -255,7 +255,7 @@ class FlowController {
   @nonVirtual
   Future<void> complete() async {
     while (isRunning) {
-      next = await next.run(context);
+      next = await next!.run(context);
 
       if (next == null) {
         _updateState(FlowState.Completed);
@@ -289,7 +289,7 @@ class FlowController {
   }
 
   /// Gets the [FlowController] of a flow from it's [context].
-  static FlowController of(RunContext context) =>
+  static FlowController? of(RunContext context) =>
       Provider.of<FlowController>(context);
 }
 
@@ -314,8 +314,8 @@ FlowController runFlow(
 /// [RunOptions] may be different from parent flow controller's run options, if
 /// specified, else uses the same [RunOptions] as in the parent flow controller.
 FlowController _runSubFlow({
-  @required Flow flow,
-  @required RunContext parentContext,
+  required Flow flow,
+  required RunContext parentContext,
 }) {
   final controller = FlowController.of(parentContext);
 

@@ -5,11 +5,11 @@ abstract class Flow {
   const Flow();
 
   @protected
-  FutureOr<Flow> run(RunContext context);
+  FutureOr<Flow?> run(RunContext context);
 }
 
 class FlowBuilder extends Flow {
-  FlowBuilder({@required this.builder});
+  FlowBuilder({required this.builder});
 
   @override
   FutureOr<Flow> run(RunContext context) => builder(context);
@@ -19,14 +19,14 @@ class FlowBuilder extends Flow {
 
 class ParallelFlow extends Flow {
   const ParallelFlow({
-    @required this.flows,
+    required this.flows,
     this.next,
   });
 
   final Iterable<Flow> flows;
-  final Flow next;
+  final Flow? next;
 
-  Future<Flow> run(RunContext context) async {
+  Future<Flow?> run(RunContext context) async {
     var subFlowControllers =
         flows.map((flow) => _runSubFlow(flow: flow, parentContext: context));
 
@@ -38,16 +38,16 @@ class ParallelFlow extends Flow {
 
 class Recipe extends Flow {
   const Recipe({
-    @required this.name,
+    required this.name,
     this.description,
-    @required this.startsFrom,
+    required this.startsFrom,
   });
 
   final Flow startsFrom;
 
   final String name;
 
-  final String description;
+  final String? description;
 
   @override
   FutureOr<Flow> run(RunContext context) {

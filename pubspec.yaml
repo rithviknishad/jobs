@@ -12,7 +12,7 @@ homepage: https://github.com/crysalisdevs/bakecode-jobs.git
 publish_to: "none"
 
 environment:
-  sdk: ">=2.8.1 <3.0.0"
+  sdk: ">=2.12.0 <3.0.0"
 
 dependencies:
-  meta: ^1.2.4
+  meta: ^1.3.0

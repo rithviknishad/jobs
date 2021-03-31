@@ -11,9 +11,9 @@ class RunContext {
     });
   }
 
-  int get contextID => this['context id'];
+  int? get contextID => this['context id'];
 
-  DateTime get createdOn => this['created on'];
+  DateTime? get createdOn => this['created on'];
 
   operator []=(key, value) => _data[key] = value;
 
